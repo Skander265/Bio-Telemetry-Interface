@@ -1,0 +1,23 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Bytecode files
+__pycache__/
+*.py[cod]
+
+# VS Code settings
+.vscode/
+
+# Arduino build files 
+*.ino.*
+*.hex
+
+# Log and data files
+data/*.csv
+*.log
+
+# OS-generated files
+.DS_Store
+Thumbs.db
