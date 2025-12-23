@@ -1,6 +1,8 @@
 # Bio-Telemetry Interface: Botanical Intrusion Detector
 
-This system monitors the bioelectric voltage of living plants to detect external stimuli. It acts as a bridge between organic life and digital systems, using machine learning to distinguish between natural background noise and deliberate intrusions like cutting or burning.
+This system monitors the bioelectric voltage of living plants to detect external stimuli. It acts as a bridge between organic life and digital systems, utilizing signal processing algorithms to distinguish between natural background noise and deliberate intrusions like cutting or burning.
+
+The application leverages a multithreaded architecture to decouple data ingestion from visualization. This design enables the simultaneous rendering of real-time voltage plots and the execution of background analysis threads, ensuring event detection with low signal latency.
 
 ## Hardware Setup (For Live Mode)
 
