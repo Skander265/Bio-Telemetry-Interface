@@ -38,5 +38,4 @@ The system uses Isolation Forest (Scikit-Learn) for unsupervised anomaly detecti
 * Live Mode: Reads real-time voltage from the hardware bridge.
 * Mock Mode: Generates physics-based plant signals (noise + random spikes) for testing without hardware.
 * Playback Mode: Loads .csv files to replay and analyze historical data.
-* Bio-Synth: Converts voltage fluctuations into real-time audio—the plant "drones" when calm and "shrieks" when disturbed.
-* Dashboard: High-performance real-time plotting built with PyQt5 & PyQtGraph.
+* Bio-Synth: Converts voltage fluctuations into real-time audio. The plant "drones" when calm and goes higher pitch when disturbed.
