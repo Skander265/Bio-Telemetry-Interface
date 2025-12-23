@@ -96,7 +96,7 @@ class SignalAnalyst:
             
             return {
                 "type": "CALIBRATING", 
-                "message": f"Acquiring Baseline ({samples_remaining} samples remaining)",
+                "message": f"Acquiring Baseline",
                 "peak": features[0],
                 "duration": len(raw_signal)
             }

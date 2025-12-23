@@ -26,11 +26,11 @@ class MockReader:
             if random.random() > 0.3:
                 self.spike_frames_left = 10  # Hold for 0.2s
                 
-                # WEIGHTED CHOICE: 80% chance for Leaf, 10% Root, 10% Stem
+                # WEIGHTED CHOICE: 80% chance for Leaf, 20% Root, 20% Stem
                 rand_val = random.random()
-                if rand_val < 0.1:
+                if rand_val < 0.2:
                     self.spike_target = 'root'
-                elif rand_val < 0.2:
+                elif rand_val < 0.4:
                     self.spike_target = 'stem'
                 else:
                     self.spike_target = 'leaf'

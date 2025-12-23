@@ -11,6 +11,7 @@ import utils.noise_filter as noise_filter
 import processing.signal_analyst as signal_analyst
 import reader.serial_reader as serial_reader  
 import reader.mock_reader as mock_reader  
+import reader.csv_reader as csv_reader # NEW IMPORT
 import ui.gui_window as gui_window
 import utils.config_loader as config_loader
 import ui.launcher as launcher 
@@ -21,27 +22,37 @@ def clean_models_if_needed():
     """If user requested a re-train, delete the old brains."""
     if CONFIG.get("force_retrain", False):
         if os.path.exists("models"):
-            print("🧹 PURGING OLD MODELS (Force Retrain Selected)...")
+            print("PURGING OLD MODELS (Force Retrain Selected)...")
             shutil.rmtree("models")
             os.makedirs("models")
 
 def data_worker(data_queue, stop_event):
-    #  Hardware/Mock Initialization
-    detected_port = None
-    if not CONFIG["force_mock_mode"]:
-        if CONFIG["serial_port"] != "AUTO":
-             detected_port = CONFIG["serial_port"]
-        else:
-             detected_port = serial_reader.find_available_port()
-
-    if detected_port:
-        print(f"Hardware found on {detected_port}")
-        mode = 'SERIAL'
-        source = serial_reader.connect_serial(detected_port)
+    #  Hardware/Mock/CSV Initialization
+    mode = 'MOCK'
+    
+    # PRIORITY 1: CSV Playback
+    if CONFIG.get("use_csv_input", False) and CONFIG.get("csv_file_path"):
+        print(f"Starting CSV Playback Mode: {CONFIG['csv_file_path']}")
+        mode = 'CSV'
+        source = csv_reader.CsvReader(CONFIG['csv_file_path'])
+        
+    # PRIORITY 2: Hardware / Mock
     else:
-        print(f"Starting Mock Mode: 1 Root, 1 Stem, {CONFIG['leaf_sensor_count']} Leaves")
-        mode = 'MOCK'
-        source = mock_reader.MockReader(leaf_count=CONFIG['leaf_sensor_count'])
+        detected_port = None
+        if not CONFIG["force_mock_mode"]:
+            if CONFIG["serial_port"] != "AUTO":
+                 detected_port = CONFIG["serial_port"]
+            else:
+                 detected_port = serial_reader.find_available_port()
+
+        if detected_port:
+            print(f"Hardware found on {detected_port}")
+            mode = 'SERIAL'
+            source = serial_reader.connect_serial(detected_port)
+        else:
+            print(f"Starting Mock Mode: 1 Root, 1 Stem, {CONFIG['leaf_sensor_count']} Leaves")
+            mode = 'MOCK'
+            source = mock_reader.MockReader(leaf_count=CONFIG['leaf_sensor_count'])
 
     #  Filter & Model Initialization
     total = CONFIG["total_sensors"]
@@ -67,6 +78,8 @@ def data_worker(data_queue, stop_event):
     while not stop_event.is_set():
         if mode == 'SERIAL':
             t, voltages = serial_reader.read_line(source) 
+        elif mode == 'CSV':
+            t, voltages = source.read_line()
         else:
             t, voltages = source.read_line()
 

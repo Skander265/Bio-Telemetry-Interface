@@ -103,7 +103,7 @@ class PlantMonitorWindow(QtWidgets.QMainWindow):
             self.status_label.setStyleSheet("font-size: 24px; font-weight: bold; color: #FF0055; background: transparent;")
             self.logger.log_event(f"ALARM_{location}", status_dict['peak'], status_dict['duration'])
             
-        elif event_type == "LEARNING":
+        elif event_type == "LEARNING" or event_type == "CALIBRATING":
             msg = status_dict.get("message", "Calibrating...")
             self.status_label.setText(f"NEURAL TRAINING: {msg}")
             self.status_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #FFD700; background: transparent;")
