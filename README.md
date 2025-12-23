@@ -1,4 +1,4 @@
-# 🌿 Bio-Telemetry Interface: Botanical Intrusion Detector
+# Bio-Telemetry Interface: Botanical Intrusion Detector
 
 This project acts as a bridge between organic life and digital systems. It monitors the bioelectric potential (voltage) of living plants in real-time to detect external stimuli. By analyzing these micro-voltage changes, the system can distinguish between background noise (wind, growth) and deliberate intrusion (human touch, cutting, or burning).
 
