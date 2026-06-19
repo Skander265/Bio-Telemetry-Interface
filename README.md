@@ -1,78 +1,43 @@
 # Bio-Telemetry Interface: Botanical Intrusion Detector
 
-This project acts as a bridge between organic life and digital systems. It monitors the bioelectric potential (voltage) of living plants in real-time to detect external stimuli. By analyzing these micro-voltage changes, the system can distinguish between background noise (wind, growth) and deliberate intrusion (human touch, cutting, or burning).
+This system monitors the bioelectric voltage of living plants to detect external stimuli. It acts as a bridge between organic life and digital systems, utilizing signal processing algorithms to distinguish between natural background noise and deliberate intrusions like cutting or burning.
 
-## System Architecture
+The application leverages a multithreaded architecture to decouple data ingestion from visualization. This design enables the simultaneous rendering of real-time voltage plots and the execution of background analysis threads, ensuring event detection with low signal latency.
 
-The application is built on a modular pipeline designed for low-latency signal processing:
+## Hardware Setup (For Live Mode)
 
-### 1. Signal Acquisition Layer
+To use this with a real plant, you need an Arduino (Uno/Nano/ESP32) communicating via Serial/USB.
 
-* Hardware Bridge: Reads raw analog voltage (0-5V) via Serial/USB from an Arduino.
-* Virtual Plant Generator: A physics-based mock engine that simulates organic noise and random voltage spikes for testing without hardware.
-* Forensic Replay: Loads historical .csv voltage data to train the AI on specific scenarios.
+Probes: Use Ag/AgCl electrodes or standard alligator clips.
+Signal (+): Clip gently onto the leaf or stem.
+Ground (-): Insert a metal spike or probe deep into the moist soil (root system).
 
-### 2. Signal Processing & Intelligence
 
-* Noise Filtration: Implements a Moving Average Filter to smooth out high-frequency electrical noise (60Hz hum) while preserving the shape of organic spikes.
-* Anomaly Detection Engine: Uses Scikit-Learn's Isolation Forest. Each sensor (Root, Stem, Leaf) has its own dedicated machine learning model that learns the "baseline" behavior of the plant during a calibration phase.
-* State Machine Logic: Automatically switches sensors between states like Calibrating and Monitoring.
+Circuit:
+* Recommended: Use an Instrumentation Amplifier (like the AD620) to boost micro-voltage changes and reduce noise.
+* Basic: A simple voltage divider can detect strong trauma signals, but may miss subtle interactions.
+* Input: The software expects a standardized analog signal (0-5V) mapped to the Arduino's analog pins.
 
-### 3. Human-Machine Interface (HMI)
 
-* Real-Time Dashboard: A high-performance PyQt5 & PyQtGraph interface rendering live bio-signals.
-* Bio-Synth Sonification: A generative audio engine that converts voltage fluctuations into sound. The plant "sings" a low drone when calm and shrieks when disturbed.
 
----
-
-## Key Features
-
-* Neural Calibration: The system spends time "learning" the plant's normal electrical activity. It adapts to the specific noise floor of your environment automatically.
-* Auditory Feedback: Enable "Bio-Synth" to hear the plant's nervous system. Pitch modulates based on the highest voltage detected in the network.
-* Dataset Training: Import your own .csv files to train the detection models on pre-recorded events.
-
----
-
-## Installation
+## Quick Start
 
 ```bash
 pip install -r requirements.txt
-```
-
----
-
-## Usage
-
-Run the main entry point to open the System Launcher:
-
-```bash
 python src/main.py
 ```
 
-### The Launcher Config
+## Data analysis
 
-Before the monitoring starts, you can configure:
+The system uses Isolation Forest (Scikit-Learn) for unsupervised anomaly detection.
 
-1. Operational Mode:
+* Preprocessing: A Moving Average Filter cleans raw signals to remove high-frequency noise (like 60Hz hum) while preserving organic spike shapes.
+* Training: Each sensor (Root, Stem, Leaf) trains its own independent model during the "Calibration" phase to learn the specific plant's baseline behavior.
+* Inference: Once trained, any voltage pattern that deviates significantly from the learned baseline is immediately flagged as an intrusion.
 
-* Monitor: Load existing AI models (instant start).
-* Calibrate: Force the AI to relearn the plant's signals (may take some time).
+## Modes & Features
 
-2. Data Source:
-
-* Live/Mock: Use real Arduino or the internal simulator.
-* Playback CSV: Select a file to simulate a specific attack pattern.
-
-3. Topology: Define how many leaf sensors are connected.
-
----
-
-## Hardware Setup (Optional)
-
-To use this with a real plant, you need:
-
-* Microcontroller: Arduino Uno/Nano or ESP32.
-* Probes: Ag/AgCl electrodes or simple alligator clips.
-* Positive Probe: Attach to the leaf/stem.
-* Ground Probe: Insert into the soil (Root).
-* Circuit: Simple voltage divider or Op-Amp (instrumentation amplifier) recommended for cleaner signals.
+* Live Mode: Reads real-time voltage from the hardware bridge.
+* Mock Mode: Generates physics-based plant signals (noise + random spikes) for testing without hardware.
+* Playback Mode: Loads .csv files to replay and analyze historical data.
+* Bio-Synth: Converts voltage fluctuations into real-time audio. The plant "drones" when calm and goes higher pitch when disturbed.
