@@ -6,15 +6,17 @@ import os
 from PyQt5 import QtWidgets
 
 # Project Imports
-from utils import audio_feedback
-import utils.noise_filter as noise_filter
-import processing.signal_analyst as signal_analyst
-import reader.serial_reader as serial_reader  
 import reader.mock_reader as mock_reader  
 import reader.csv_reader as csv_reader # NEW IMPORT
 import ui.gui_window as gui_window
 import utils.config_loader as config_loader
 import ui.launcher as launcher 
+
+try:
+    import bio_core_cpp
+except ImportError:
+    print("CRITICAL: bio_core_cpp module not found. Please build the C++ extension first.")
+    sys.exit(1)
 
 CONFIG = {}
 
@@ -43,12 +45,13 @@ def data_worker(data_queue, stop_event):
             if CONFIG["serial_port"] != "AUTO":
                  detected_port = CONFIG["serial_port"]
             else:
-                 detected_port = serial_reader.find_available_port()
+                 detected_port = bio_core_cpp.SerialReader.find_available_port()
 
         if detected_port:
             print(f"Hardware found on {detected_port}")
             mode = 'SERIAL'
-            source = serial_reader.connect_serial(detected_port)
+            source = bio_core_cpp.SerialReader()
+            source.connect_serial(detected_port)
         else:
             print(f"Starting Mock Mode: 1 Root, 1 Stem, {CONFIG['leaf_sensor_count']} Leaves")
             mode = 'MOCK'
@@ -58,30 +61,25 @@ def data_worker(data_queue, stop_event):
     total = CONFIG["total_sensors"]
     window_size = CONFIG["filter_window_size"]
     
-    filters = [noise_filter.MovingAverageFilter(window_size) for _ in range(total)]
+    filters = [bio_core_cpp.MovingAverageFilter(window_size) for _ in range(total)]
     
     brains = []
     for i in range(total):
         if i == 0: s_id = "root"
         elif i == 1: s_id = "stem"
         else: s_id = f"leaf_{i-1}"
-        brains.append(signal_analyst.SignalAnalyst(sensor_id=s_id))
+        brains.append(bio_core_cpp.SignalAnalyst(sensor_id=s_id))
 
     # Audio Engine Initialization
     audio_enabled = CONFIG.get("enable_audio", False)
-    synth = audio_feedback.AudioSynthesizer() 
+    synth = bio_core_cpp.AudioSynthesizer() 
     
     if audio_enabled:
         synth.start()
     
     #  Main Data Loop
     while not stop_event.is_set():
-        if mode == 'SERIAL':
-            t, voltages = serial_reader.read_line(source) 
-        elif mode == 'CSV':
-            t, voltages = source.read_line()
-        else:
-            t, voltages = source.read_line()
+        t, voltages = source.read_line()
 
         if not voltages or len(voltages) != total: 
             continue
